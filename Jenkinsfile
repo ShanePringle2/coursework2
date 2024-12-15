@@ -38,14 +38,14 @@ pipeline {
         }
 
         stage('Push Docker Image') {
-            steps {
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        sh 'docker push $DOCKER_IMAGE'
-                    }
-                }
+    steps {
+        script {
+            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                dockerImage.push('latest')
             }
         }
+    }
+}
 
         stage('Deploy to Kubernetes') {
             steps {
