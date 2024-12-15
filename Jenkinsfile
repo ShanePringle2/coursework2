@@ -2,14 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'your-dockerhub-username/your-image-name'
+        DOCKER_IMAGE = 'shanepringlegcu/cw2-server'
         DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/ShanePringle2/coursework2'
+                git branch: 'master', url: 'https://github.com/ShanePringle2/coursework2'
             }
         }
 
