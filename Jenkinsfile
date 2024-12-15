@@ -1,15 +1,15 @@
 pipeline {
     agent {
-        docker { 
-            image 'docker:latest' 
+        docker {
+            image 'docker:latest'
+            args '-u root -v /var/run/docker.sock:/var/run/docker.sock'
         }
     }
 
     environment {
-        DOCKERHUB_USERNAME = 'shanepringlegcu' // Replace with your DockerHub username
-        DOCKERHUB_PASSWORD = credentials('dockerhub-credentials') // Jenkins credential ID
+        DOCKERHUB_USERNAME = 'shanepringlegcu'
+        DOCKERHUB_PASSWORD = credentials('dockerhub-credentials')
         IMAGE_NAME = 'shanepringlegcu/cw2-server'
-        DOCKER_CONFIG = "${env.WORKSPACE}/.docker" // Set a writable config directory
     }
 
     stages {
@@ -19,22 +19,9 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                sh 'echo "Building the project..."'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                sh 'echo "Running tests..."'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 sh '''
-                    mkdir -p $DOCKER_CONFIG
                     docker build -t $IMAGE_NAME .
                 '''
             }
@@ -47,13 +34,3 @@ pipeline {
                         sh 'docker push $IMAGE_NAME'
                     }
                 }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                sh 'echo "Deploying application..."'
-            }
-        }
-    }
-}
