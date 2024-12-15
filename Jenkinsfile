@@ -20,14 +20,21 @@ pipeline {
         }
 
         stage('Test Docker Container') {
-            steps {
-                sh '''
-                docker run -d --name test-container $DOCKER_IMAGE
+    steps {
+        script {
+          
+            sh '''
+                if [ $(docker ps -aq -f name=test-container) ]; then
+                    docker rm -f test-container
+                fi
+            '''
+    
+            sh '''
+                docker run -d --name test-container shanepringlegcu/cw2-server
                 docker exec test-container echo "Container is running successfully!"
-                docker stop test-container
-                docker rm test-container
-                '''
-            }
+            '''
+        }
+    }
         }
 
         stage('Push Docker Image') {
