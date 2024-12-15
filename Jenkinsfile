@@ -35,14 +35,14 @@ pipeline {
 
     environment {
         DOCKERHUB_USERNAME = 'shanepringlegcu' // Replace with your DockerHub username
-        DOCKERHUB_PASSWORD = credentials('Runescape#1') // Add this credential in Jenkins
-        IMAGE_NAME = 'shanepringlegcu/cw2-server:1.0'
+        DOCKERHUB_PASSWORD = credentials('dockerhub-credentials') // Add this credential in Jenkins
+        IMAGE_NAME = 'shanepringlegcu/cw2-server'
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/ShanePringle2/coursework2'
+                git branch: 'main', url: 'https://github.com/ShanePringle2/coursework2.git'
             }
         }
 
