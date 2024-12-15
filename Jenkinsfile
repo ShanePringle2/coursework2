@@ -1,12 +1,15 @@
 pipeline {
     agent {
-        docker { image 'docker:latest' }
+        docker { 
+            image 'docker:latest' 
+        }
     }
 
     environment {
         DOCKERHUB_USERNAME = 'shanepringlegcu' // Replace with your DockerHub username
-        DOCKERHUB_PASSWORD = credentials('dockerhub-credentials') // Add this credential in Jenkins
+        DOCKERHUB_PASSWORD = credentials('dockerhub-credentials') // Jenkins credential ID
         IMAGE_NAME = 'shanepringlegcu/cw2-server'
+        DOCKER_CONFIG = "${env.WORKSPACE}/.docker" // Set a writable config directory
     }
 
     stages {
@@ -30,7 +33,10 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                sh '''
+                    mkdir -p $DOCKER_CONFIG
+                    docker build -t $IMAGE_NAME .
+                '''
             }
         }
 
