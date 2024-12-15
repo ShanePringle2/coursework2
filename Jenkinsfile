@@ -1,71 +1,29 @@
 pipeline {
     agent any
 
-    environment {
-        DOCKERHUB_USERNAME = 'shanepringlegcu'  // Replace with your DockerHub username
-        DOCKERHUB_PASSWORD = credentials('dockerhub-credentials')  // Add this credential in Jenkins
-        IMAGE_NAME = 'shanepringlegcu/cw2-server'
-    }
-
     stages {
-        stage('Clone Repository') {
+        stage('Clone') {
             steps {
-                echo "Cloning repository..."
                 git branch: 'master', url: 'https://github.com/ShanePringle2/coursework2.git'
             }
         }
 
-        stage('Build Project') {
+        stage('Build') {
             steps {
-                echo "Building the project..."
-                sh 'echo "Build step is running..."'
+                sh 'echo "Building the project..."'
             }
         }
 
-        stage('Run Tests') {
+        stage('Test') {
             steps {
-                echo "Running tests..."
-                sh 'echo "Tests executed successfully."'
+                sh 'echo "Running tests..."'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Deploy') {
             steps {
-                echo "Building Docker image..."
-                script {
-                    sh 'docker build -t $IMAGE_NAME .'
-                }
+                sh 'echo "Deploying application..."'
             }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                echo "Pushing Docker image to DockerHub..."
-                script {
-                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                        sh 'docker push $IMAGE_NAME'
-                    }
-                }
-            }
-        }
-
-        stage('Deploy Application') {
-            steps {
-                echo "Deploying application..."
-                sh 'echo "Deployment step executed."'
-            }
-        }
-    }
-
-    post {
-        always {
-            echo "Pipeline execution completed."
-        }
-        success {
-            echo "Pipeline executed successfully!"
-        }
-        failure {
-            echo "Pipeline execution failed!"
         }
     }
 }
