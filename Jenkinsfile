@@ -2,57 +2,60 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'shanepringlegcu/cw2-server'
-        DOCKERHUB_CREDENTIALS = credentials('dockerhub-credentials')
+        DOCKER_IMAGE_NAME = 'shanepringlegcu/cw2-server'
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git branch: 'master', url: 'https://github.com/ShanePringle2/coursework2'
+                git branch: 'master', url: 'https://github.com/ShanePringle2/coursework2.git'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE .'
+                script {
+                    // Build the Docker image and assign it to the dockerImage variable
+                    dockerImage = docker.build("${DOCKER_IMAGE_NAME}")
+                }
             }
         }
 
         stage('Test Docker Container') {
-    steps {
-        script {
-          
-            sh '''
-                if [ $(docker ps -aq -f name=test-container) ]; then
-                    docker rm -f test-container
-                fi
-            '''
-    
-            sh '''
-                docker run -d --name test-container shanepringlegcu/cw2-server
-                docker exec test-container echo "Container is running successfully!"
-            '''
-        }
-    }
+            steps {
+                script {
+                    // Remove any existing container with the same name
+                    if (sh(script: 'docker ps -aq -f name=test-container', returnStdout: true).trim()) {
+                        sh 'docker rm -f test-container'
+                    }
+                    // Run a container from the built image
+                    sh 'docker run -d --name test-container ${DOCKER_IMAGE_NAME}'
+                    // Execute a command inside the container to verify it is running
+                    sh 'docker exec test-container echo "Container is running successfully!"'
+                }
+            }
         }
 
         stage('Push Docker Image') {
-    steps {
-        script {
-            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
-                dockerImage.push('latest')
+            steps {
+                script {
+                    // Push the image to Docker Hub
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub-credentials') {
+                        dockerImage.push('latest')
+                    }
+                }
             }
         }
-    }
-}
 
         stage('Deploy to Kubernetes') {
+            when {
+                expression {
+                    currentBuild.result == null || currentBuild.result == 'SUCCESS'
+                }
+            }
             steps {
-                sh '''
-                kubectl set image deployment/your-deployment-name your-container-name=$DOCKER_IMAGE --record
-                kubectl rollout status deployment/your-deployment-name
-                '''
+                echo 'Deploying to Kubernetes...'
+                // Add your Kubernetes deployment commands here
             }
         }
     }
@@ -60,9 +63,6 @@ pipeline {
     post {
         always {
             echo 'Pipeline execution completed.'
-        }
-        success {
-            echo 'Pipeline executed successfully!'
         }
         failure {
             echo 'Pipeline execution failed!'
